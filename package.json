@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "npx prisma generate && echo 'Build completed - using ts-node for execution'",
-    "start": "npx ts-node src/index.ts",
+    "start": "npx ts-node --transpile-only src/index.ts",
     "postbuild": "npx prisma generate",
     "db:generate": "npx prisma generate",
     "db:push": "npx prisma db push",
