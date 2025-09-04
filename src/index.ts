@@ -37,13 +37,19 @@ app.get('/health', (req, res) => {
     'Cache-Control': 'no-cache'
   });
   
+  console.log(`🔍 Health check requested from: ${req.ip || req.connection.remoteAddress}`);
+  
   res.status(200).json({ 
     status: 'OK', 
     message: 'ReviewPage API is running',
     timestamp: new Date().toISOString(),
     port: PORT,
     env: process.env.NODE_ENV || 'development',
-    uptime: process.uptime()
+    uptime: Math.floor(process.uptime()),
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+    }
   });
 });
 
@@ -145,20 +151,21 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   setTimeout(() => {
     const http = require('http');
     const healthReq = http.request({
-      hostname: 'localhost',
+      hostname: '127.0.0.1', // Force IPv4 to avoid IPv6 connection issues
       port: PORT,
       path: '/health',
       method: 'GET',
-      timeout: 5000
-    }, (res) => {
+      timeout: 5000,
+      family: 4 // Explicitly use IPv4
+    }, (res: any) => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', (chunk: any) => data += chunk);
       res.on('end', () => {
         console.log(`✅ Internal health check successful: ${res.statusCode} - ${data}`);
         console.log(`🎯 Railway health check should be working on /health`);
       });
     });
-    healthReq.on('error', (err) => {
+    healthReq.on('error', (err: any) => {
       console.error(`❌ Internal health check failed:`, err);
     });
     healthReq.on('timeout', () => {
@@ -166,7 +173,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
       healthReq.destroy();
     });
     healthReq.end();
-  }, 2000); // Test after 2 seconds - faster for Railway
+  }, 3000); // Test after 3 seconds - give server more time to fully start
   
   // Keep alive ping - reduce frequency to avoid noise
   setInterval(() => {
