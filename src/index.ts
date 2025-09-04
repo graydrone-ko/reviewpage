@@ -26,8 +26,8 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
-// Trust proxy for Railway deployment
-app.set('trust proxy', true);
+// Trust proxy for Railway deployment (specific proxy configuration)
+app.set('trust proxy', ['127.0.0.1', 'loopback', 'uniquelocal']);
 
 // Security middleware
 app.use(helmet());
@@ -60,10 +60,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Rate limiting
+// Rate limiting with Railway-specific configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  trustProxy: true, // Trust Railway's proxy
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === '/health';
+  }
 });
 app.use(limiter);
 
