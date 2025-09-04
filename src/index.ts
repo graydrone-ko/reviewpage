@@ -10,6 +10,17 @@ import rewardRoutes from './routes/rewards';
 import adminRoutes from './routes/admin';
 import seoRoutes from './routes/seo';
 
+// Process error handlers
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 dotenv.config();
 
 const app = express();
