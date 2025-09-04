@@ -23,12 +23,11 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
       name: decoded.name,
       createdAt: decoded.createdAt,
       updatedAt: decoded.updatedAt,
-      age: decoded.age,
+      birthDate: decoded.birthDate,
       gender: decoded.gender,
       phoneNumber: decoded.phoneNumber,
       bankCode: decoded.bankCode,
-      accountNumber: decoded.accountNumber,
-      rewards: decoded.rewards
+      accountNumber: decoded.accountNumber
     };
 
     next();

@@ -99,13 +99,17 @@ export const submitResponse = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if user meets survey criteria
-    if (req.user.age) {
-      if (req.user.age < survey.targetAgeMin || req.user.age > survey.targetAgeMax) {
+    if (req.user.birthDate) {
+      const today = new Date();
+      const birthDate = new Date(req.user.birthDate);
+      const age = today.getFullYear() - birthDate.getFullYear();
+      
+      if (age < survey.targetAgeMin || age > survey.targetAgeMax) {
         return res.status(400).json({ error: 'You do not meet the age criteria for this survey' });
       }
     }
 
-    if (survey.targetGender !== 'ALL' && req.user.gender && req.user.gender !== 'OTHER') {
+    if (survey.targetGender !== 'ALL' && req.user.gender && (req.user.gender === 'MALE' || req.user.gender === 'FEMALE')) {
       if (req.user.gender !== survey.targetGender) {
         return res.status(400).json({ error: 'You do not meet the gender criteria for this survey' });
       }

@@ -176,12 +176,17 @@ export const getSurveys = async (req: AuthRequest, res: Response) => {
       where.status = 'APPROVED';
       where.endDate = { gte: new Date() };
       
-      if (req.user.age) {
-        where.targetAgeMin = { lte: req.user.age };
-        where.targetAgeMax = { gte: req.user.age };
+      // Calculate age from birthDate
+      if (req.user.birthDate) {
+        const today = new Date();
+        const birthDate = new Date(req.user.birthDate);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        
+        where.targetAgeMin = { lte: age };
+        where.targetAgeMax = { gte: age };
       }
       
-      if (req.user.gender && req.user.gender !== 'OTHER') {
+      if (req.user.gender && (req.user.gender === 'MALE' || req.user.gender === 'FEMALE')) {
         where.OR = [
           { targetGender: req.user.gender },
           { targetGender: 'ALL' }
