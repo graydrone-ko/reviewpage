@@ -6,8 +6,8 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
-    "esModuleInterop": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": false,
     "resolveJsonModule": true,
     "declaration": false,
@@ -22,7 +22,9 @@
     "noImplicitReturns": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "allowJs": true
+    "allowJs": true,
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedIndexedAccess": false
   },
   "include": [
     "src/**/*",

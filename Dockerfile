@@ -20,8 +20,11 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
+# Verify the build output exists
+RUN ls -la dist/
+
 # Expose port
 EXPOSE $PORT
 
-# Start the application
-CMD ["npm", "start"]
+# Start the compiled application directly (not through npm)
+CMD ["node", "dist/index.js"]
