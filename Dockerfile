@@ -1,5 +1,5 @@
 # Use Node.js LTS version
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -8,38 +8,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install all dependencies (including devDependencies for TypeScript compilation)
+# Install dependencies
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Generate Prisma client and build the application
-RUN npx prisma generate && npm run build
-
-# Production stage
-FROM node:18-alpine AS production
-
-# Set working directory
-WORKDIR /app
-
-# Copy package files and install only production dependencies
-COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
-
-# Copy built application and Prisma files from builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY prisma ./prisma
-
-# Create a non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
-USER nextjs
+# Generate Prisma client and build
+RUN npm run build
 
 # Expose port
 EXPOSE $PORT
 
-# Start the compiled application directly
-CMD ["node", "dist/index.js"]
+# Use npm start which now points to compiled JS
+CMD ["npm", "start"]
