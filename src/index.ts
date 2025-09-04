@@ -26,6 +26,9 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
+// Trust proxy for Railway deployment
+app.set('trust proxy', true);
+
 // Security middleware
 app.use(helmet());
 
@@ -82,22 +85,7 @@ app.use('/api/admin', adminRoutes);
 // SEO 라우트 (API prefix 없이)
 app.use('/', seoRoutes);
 
-// 프론트엔드 정적 파일 서빙 (프로덕션 환경에서만)
-if (process.env.NODE_ENV === 'production') {
-  const path = require('path');
-  
-  // 정적 파일 서빙
-  app.use(express.static(path.join(__dirname, 'public')));
-  
-  // SPA 라우팅을 위한 catch-all 라우트 (API 라우트 제외)
-  app.get('*', (req, res) => {
-    // API 라우트나 SEO 라우트가 아닌 경우에만 index.html 서빙
-    if (req.path.startsWith('/api/') || req.path === '/sitemap.xml' || req.path === '/robots.txt') {
-      return res.status(404).json({ error: 'API route not found' });
-    }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-}
+// Backend API only - no static file serving needed
 
 // Error handling middleware
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
