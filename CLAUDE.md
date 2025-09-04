@@ -125,4 +125,4 @@ The `/scripts` folder contains operational utilities:
 
 Use scripts in `/scripts` directory for database operations and testing. Always backup data before running data manipulation scripts.
 
-For Railway deployment, the application expects DATABASE_URL and other environment variables to be set in the platform configuration.
+For Railway deployment, the application expects DATABASE_URL and other environment variables to be set in the platform configuration. 
