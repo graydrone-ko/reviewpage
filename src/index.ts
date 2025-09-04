@@ -29,6 +29,26 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 // Trust proxy for Railway deployment (specific proxy configuration)
 app.set('trust proxy', ['127.0.0.1', 'loopback', 'uniquelocal']);
 
+// Health check - must be first, before any middleware
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'ReviewPage API is running',
+    timestamp: new Date().toISOString(),
+    port: PORT,
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Root endpoint for basic connectivity test
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'ReviewPage Backend API',
+    version: '1.0.0'
+  });
+});
+
 // Security middleware
 app.use(helmet());
 
@@ -77,10 +97,7 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'ReviewPage API is running' });
-});
+// Routes (after health check defined above)
 
 app.use('/api/auth', authRoutes);
 app.use('/api/surveys', surveyRoutes);
