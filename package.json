@@ -4,8 +4,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "npx prisma generate && npx tsc --skipLibCheck --noEmitOnError && ls -la dist/",
-    "start": "node dist/index.js",
+    "build": "npx prisma generate",
+    "start": "npx ts-node src/index.ts",
     "start:dev": "npx ts-node src/index.ts",
     "postbuild": "npx prisma generate",
     "db:generate": "npx prisma generate",

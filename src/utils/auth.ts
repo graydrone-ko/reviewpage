@@ -21,7 +21,7 @@ export const comparePassword = async (password: string, hashedPassword: string):
 };
 
 export const generateToken = (user: Pick<User, 'id' | 'email' | 'role' | 'birthDate' | 'gender'>): string => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET || 'temp-secret-for-railway-deployment-please-set-real-jwt-secret-in-env';
   if (!secret) {
     throw new Error('JWT_SECRET is not defined');
   }
@@ -40,7 +40,7 @@ export const generateToken = (user: Pick<User, 'id' | 'email' | 'role' | 'birthD
 };
 
 export const verifyToken = (token: string): any => {
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.JWT_SECRET || 'temp-secret-for-railway-deployment-please-set-real-jwt-secret-in-env';
   if (!secret) {
     throw new Error('JWT_SECRET is not defined');
   }
