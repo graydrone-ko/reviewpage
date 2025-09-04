@@ -31,12 +31,19 @@ app.set('trust proxy', ['127.0.0.1', 'loopback', 'uniquelocal']);
 
 // Health check - must be first, before any middleware
 app.get('/health', (req, res) => {
+  // Set proper headers for Railway health check
+  res.set({
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache'
+  });
+  
   res.status(200).json({ 
     status: 'OK', 
     message: 'ReviewPage API is running',
     timestamp: new Date().toISOString(),
     port: PORT,
-    env: process.env.NODE_ENV || 'development'
+    env: process.env.NODE_ENV || 'development',
+    uptime: process.uptime()
   });
 });
 
@@ -129,13 +136,42 @@ if (process.env.NODE_ENV !== 'production') {
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📖 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔧 Railway PORT env var: ${process.env.PORT}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔗 External health check: http://0.0.0.0:${PORT}/health`);
   console.log(`✅ Server ready to accept connections`);
   
-  // Keep alive ping
+  // Test health endpoint immediately - Railway needs quick response
+  setTimeout(() => {
+    const http = require('http');
+    const healthReq = http.request({
+      hostname: 'localhost',
+      port: PORT,
+      path: '/health',
+      method: 'GET',
+      timeout: 5000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        console.log(`✅ Internal health check successful: ${res.statusCode} - ${data}`);
+        console.log(`🎯 Railway health check should be working on /health`);
+      });
+    });
+    healthReq.on('error', (err) => {
+      console.error(`❌ Internal health check failed:`, err);
+    });
+    healthReq.on('timeout', () => {
+      console.error(`⏰ Health check timeout`);
+      healthReq.destroy();
+    });
+    healthReq.end();
+  }, 2000); // Test after 2 seconds - faster for Railway
+  
+  // Keep alive ping - reduce frequency to avoid noise
   setInterval(() => {
-    console.log(`💗 Server heartbeat - ${new Date().toISOString()}`);
-  }, 30000); // Every 30 seconds
+    console.log(`💗 Server heartbeat - ${new Date().toISOString()} - Uptime: ${Math.floor(process.uptime())}s`);
+  }, 60000); // Every 60 seconds
 });
 
 server.on('error', (err) => {
