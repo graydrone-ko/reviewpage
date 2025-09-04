@@ -1,6 +1,7 @@
 {
-  "name": "backend",
+  "name": "reviewpage-backend",
   "version": "1.0.0",
+  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
