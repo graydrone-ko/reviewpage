@@ -1,0 +1,8 @@
+[phases.build]
+cmd = "npm run build"
+
+[phases.start]
+cmd = "node dist/index.js"
+
+[variables]
+NODE_ENV = "production"
