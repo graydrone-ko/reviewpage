@@ -131,6 +131,11 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`📖 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
   console.log(`✅ Server ready to accept connections`);
+  
+  // Keep alive ping
+  setInterval(() => {
+    console.log(`💗 Server heartbeat - ${new Date().toISOString()}`);
+  }, 30000); // Every 30 seconds
 });
 
 server.on('error', (err) => {
