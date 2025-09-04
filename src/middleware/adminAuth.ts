@@ -21,6 +21,7 @@ export const adminAuth = (req: AdminRequest, res: Response, next: NextFunction) 
       email: decoded.email,
       role: decoded.role,
       name: decoded.name,
+      password: '', // Password not needed in JWT payload
       createdAt: decoded.createdAt,
       updatedAt: decoded.updatedAt,
       birthDate: decoded.birthDate,
