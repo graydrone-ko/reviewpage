@@ -175,10 +175,18 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     healthReq.end();
   }, 3000); // Test after 3 seconds - give server more time to fully start
   
-  // Keep alive ping - reduce frequency to avoid noise
+  // Keep alive ping - reduce frequency to avoid noise and monitor resources
   setInterval(() => {
+    const memUsage = process.memoryUsage();
     console.log(`💗 Server heartbeat - ${new Date().toISOString()} - Uptime: ${Math.floor(process.uptime())}s`);
-  }, 60000); // Every 60 seconds
+    console.log(`📊 Memory: ${Math.round(memUsage.heapUsed/1024/1024)}MB used, ${Math.round(memUsage.heapTotal/1024/1024)}MB total`);
+    
+    // Railway resource monitoring
+    if (memUsage.heapUsed > 400 * 1024 * 1024) { // 400MB warning
+      console.warn(`⚠️ High memory usage detected: ${Math.round(memUsage.heapUsed/1024/1024)}MB`);
+      global.gc && global.gc(); // Force garbage collection if available
+    }
+  }, 90000); // Every 90 seconds - reduce frequency further
 });
 
 server.on('error', (err) => {
@@ -186,13 +194,23 @@ server.on('error', (err) => {
   process.exit(1);
 });
 
-// Graceful shutdown handling
+// Enhanced shutdown handling for Railway debugging
 process.on('SIGTERM', () => {
-  console.log('📡 SIGTERM received, shutting down gracefully');
+  const uptime = Math.floor(process.uptime());
+  console.log(`📡 SIGTERM received after ${uptime}s uptime - Railway container termination`);
+  console.log('🔍 This might indicate Railway resource limits, health check issues, or deployment policies');
+  console.log('⏱️ Starting graceful shutdown...');
+  
   server.close(() => {
-    console.log('✅ Server closed');
+    console.log('✅ Server closed gracefully');
     process.exit(0);
   });
+  
+  // Force exit after 10 seconds if graceful shutdown fails
+  setTimeout(() => {
+    console.log('⚠️ Force exit after 10s timeout');
+    process.exit(1);
+  }, 10000);
 });
 
 process.on('SIGINT', () => {
@@ -201,4 +219,13 @@ process.on('SIGINT', () => {
     console.log('✅ Server closed');
     process.exit(0);
   });
+});
+
+// Additional Railway debugging signals
+process.on('SIGUSR1', () => {
+  console.log('📡 SIGUSR1 received - Railway signal');
+});
+
+process.on('SIGUSR2', () => {
+  console.log('📡 SIGUSR2 received - Railway signal');
 });
