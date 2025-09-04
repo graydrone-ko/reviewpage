@@ -8,8 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including devDependencies for TypeScript compilation)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -20,8 +20,11 @@ RUN npx prisma generate
 # Build the application
 RUN npm run build
 
+# Verify the build output exists
+RUN ls -la dist/
+
 # Expose port
 EXPOSE $PORT
 
-# Start the application
-CMD ["npm", "start"]
+# Start the compiled application directly (not through npm)
+CMD ["node", "dist/index.js"]
