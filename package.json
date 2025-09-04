@@ -19,6 +19,10 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
     "@prisma/client": "^6.15.0",
     "@tailwindcss/postcss": "^4.1.12",
