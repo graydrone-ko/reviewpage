@@ -1,10 +1,13 @@
 node_modules
 .git
 .env
-src
 *.md
 .gitignore
 .railwayignore
 nodemon.json
-tsconfig.json
 frontend/
+frontend/*
+dist/
+build/
+public/
+static/

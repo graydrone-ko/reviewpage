@@ -1,12 +1,14 @@
 [providers]
-node = "18"
+node = "18.20.4"
+
+[phases.setup]
+nixPkgs = ["nodejs-18_x", "npm-9_x"]
 
 [phases.build]
-cmd = "npm run build"
+cmd = "npm ci && npm run build"
 
 [phases.start]
 cmd = "npm start"
 
 [variables]
 NODE_ENV = "production"
-PORT = "3000"
