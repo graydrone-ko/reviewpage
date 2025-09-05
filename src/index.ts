@@ -139,13 +139,101 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📖 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔧 Railway PORT env var: ${process.env.PORT}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 External health check: http://0.0.0.0:${PORT}/health`);
   console.log(`✅ Server ready to accept connections`);
+  
+  // Auto-create test users in production (Railway)
+  if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
+    console.log('🔧 Production/Railway environment detected, creating test users...');
+    
+    setTimeout(async () => {
+      try {
+        // Import and run user creation
+        const { PrismaClient } = require('./generated/prisma');
+        const { hashPassword } = require('./utils/auth');
+        const prisma = new PrismaClient();
+        
+        console.log('📋 Starting automatic user creation...');
+        
+        // Create admin user
+        const adminHashedPassword = await hashPassword('7300gray');
+        const admin = await prisma.user.upsert({
+          where: { email: 'graydrone@naver.com' },
+          update: {
+            password: adminHashedPassword,
+            role: 'ADMIN'
+          },
+          create: {
+            email: 'graydrone@naver.com',
+            password: adminHashedPassword,
+            name: '관리자',
+            role: 'ADMIN',
+            birthDate: '800101',
+            gender: 'MALE',
+            phoneNumber: '01000000000',
+            bankCode: 'KB',
+            accountNumber: '000000000000'
+          }
+        });
+        
+        // Create seller user
+        const sellerHashedPassword = await hashPassword('test123');
+        const seller = await prisma.user.upsert({
+          where: { email: 'seller@test.com' },
+          update: {
+            password: sellerHashedPassword,
+            role: 'SELLER'
+          },
+          create: {
+            email: 'seller@test.com',
+            password: sellerHashedPassword,
+            name: '김판매자',
+            role: 'SELLER',
+            birthDate: '880523',
+            gender: 'MALE',
+            phoneNumber: '01098765432',
+            bankCode: 'NH',
+            accountNumber: '352-1234-5678-90'
+          }
+        });
+        
+        // Create consumer user
+        const consumerHashedPassword = await hashPassword('test123');
+        const consumer = await prisma.user.upsert({
+          where: { email: 'cunsumer@test.com' },
+          update: {
+            password: consumerHashedPassword,
+            role: 'CONSUMER'
+          },
+          create: {
+            email: 'cunsumer@test.com',
+            password: consumerHashedPassword,
+            name: '이설문자',
+            role: 'CONSUMER',
+            birthDate: '920815',
+            gender: 'FEMALE',
+            phoneNumber: '01055556666',
+            bankCode: 'KB',
+            accountNumber: '123-456-789012'
+          }
+        });
+        
+        console.log('✅ Test users created successfully:');
+        console.log(`   Admin: ${admin.email} (ID: ${admin.id})`);
+        console.log(`   Seller: ${seller.email} (ID: ${seller.id})`);
+        console.log(`   Consumer: ${consumer.email} (ID: ${consumer.id})`);
+        
+        await prisma.$disconnect();
+      } catch (error) {
+        console.log('⚠️ User creation completed or users already exist:', error.message);
+      }
+    }, 5000); // Wait 5 seconds after server start
+  }
   
   // Test health endpoint immediately - Railway needs quick response
   setTimeout(() => {
