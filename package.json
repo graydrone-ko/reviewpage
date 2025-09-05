@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "build": "npx prisma generate",
-    "start": "npx prisma migrate deploy && npm run seed-railway && npx ts-node src/index.ts",
+    "start": "npm run apply-migration && npm run seed-railway && npx ts-node src/index.ts",
     "start:dev": "npx ts-node src/index.ts",
     "postbuild": "npx prisma generate",
     "db:generate": "npx prisma generate",
@@ -16,6 +16,7 @@
     "db:seed": "ts-node src/create-test-users.ts",
     "seed": "ts-node src/create-test-users.ts",
     "create-users": "ts-node src/create-test-users.ts",
+    "apply-migration": "ts-node src/apply-railway-migration.ts",
     "seed-railway": "ts-node src/seed-railway-users.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
