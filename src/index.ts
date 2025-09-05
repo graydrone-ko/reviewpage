@@ -72,30 +72,42 @@ const allowedOrigins = [
   process.env.FRONTEND_URL, // Production frontend URL
   'https://reviewpage.co.kr', // Production domain
   'https://www.reviewpage.co.kr', // Production domain with www
+  // Allow any localhost origin during development/testing
+  /^http:\/\/localhost:\d+$/,
+  /^http:\/\/127\.0\.0\.1:\d+$/
 ].filter(Boolean);
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? (origin, callback) => {
-        console.log(`🌐 CORS check - Origin: ${origin || 'no-origin'}`);
-        
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) {
-          console.log('✅ CORS: Allowing no-origin request');
-          return callback(null, true);
-        }
-        
-        // Check if the origin is allowed
-        if (allowedOrigins.includes(origin)) {
-          console.log(`✅ CORS: Allowing origin ${origin}`);
-          return callback(null, true);
-        } else {
-          console.log(`❌ CORS: Blocking origin ${origin}`);
-          console.log(`📋 Allowed origins: ${allowedOrigins.join(', ')}`);
-          return callback(new Error('Not allowed by CORS'));
-        }
+  origin: (origin, callback) => {
+    console.log(`🌐 CORS check - Origin: ${origin || 'no-origin'}`);
+    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📋 Allowed origins: ${JSON.stringify(allowedOrigins, null, 2)}`);
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      console.log('✅ CORS: Allowing no-origin request');
+      return callback(null, true);
+    }
+    
+    // Check if the origin is allowed (string match or regex match)
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return allowed === origin;
+      } else if (allowed instanceof RegExp) {
+        return allowed.test(origin);
       }
-    : allowedOrigins,
+      return false;
+    });
+    
+    if (isAllowed) {
+      console.log(`✅ CORS: Allowing origin ${origin}`);
+      return callback(null, true);
+    } else {
+      console.log(`❌ CORS: Blocking origin ${origin}`);
+      console.log(`📋 Available patterns: strings and regexes in allowedOrigins`);
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
