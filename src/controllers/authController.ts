@@ -114,29 +114,50 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
+    console.log('🔐 Login attempt started');
+    console.log(`📧 Email: ${req.body.email}`);
+    console.log(`🌐 Origin: ${req.get('Origin') || 'no-origin'}`);
+    console.log(`📍 User-Agent: ${req.get('User-Agent')?.substring(0, 50) || 'unknown'}...`);
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('❌ Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
     const { email, password } = req.body;
+    console.log('✅ Request validation passed');
 
     // Find user
+    console.log('🔍 Looking up user in database...');
     const user = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!user) {
+      console.log('❌ User not found in database');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    console.log('✅ User found in database');
+    console.log(`👤 User ID: ${user.id}`);
+    console.log(`👤 User Name: ${user.name}`);
+    console.log(`👤 User Role: ${user.role}`);
 
     // Check password
+    console.log('🔒 Checking password...');
     const isValidPassword = await comparePassword(password, user.password);
     if (!isValidPassword) {
+      console.log('❌ Password verification failed');
+      console.log(`   Expected password length: ${password.length}`);
+      console.log(`   Hash: ${user.password.substring(0, 20)}...`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    console.log('✅ Password verification successful');
 
     // Generate token
+    console.log('🎫 Generating JWT token...');
     const token = generateToken({
       id: user.id,
       email: user.email,
@@ -144,8 +165,11 @@ export const login = async (req: Request, res: Response) => {
       birthDate: user.birthDate,
       gender: user.gender
     });
+    
+    console.log('✅ Token generated successfully');
+    console.log(`🎫 Token: ${token.substring(0, 30)}...`);
 
-    res.json({
+    const response = {
       message: 'Login successful',
       user: {
         id: user.id,
@@ -159,10 +183,14 @@ export const login = async (req: Request, res: Response) => {
         accountNumber: user.accountNumber
       },
       token
-    });
+    };
+    
+    console.log('🎉 Login successful - sending response');
+    res.json(response);
 
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
+    console.error('🔍 Error stack:', error.stack);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -18,6 +18,8 @@
     "create-users": "ts-node src/create-test-users.ts",
     "apply-migration": "ts-node src/apply-railway-migration.ts",
     "seed-railway": "ts-node src/seed-railway-users.ts",
+    "test-login": "ts-node src/test-login.ts",
+    "railway-diagnostics": "ts-node src/railway-diagnostics.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
