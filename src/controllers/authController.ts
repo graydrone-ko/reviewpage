@@ -125,8 +125,7 @@ export const login = async (req: Request, res: Response) => {
       const firstError = errors.array()[0];
       return res.status(400).json({ 
         error: firstError.msg,
-        code: 'VALIDATION_ERROR',
-        field: firstError.path
+        code: 'VALIDATION_ERROR'
       });
     }
 
