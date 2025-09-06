@@ -73,9 +73,12 @@ const allowedOrigins = [
   process.env.FRONTEND_URL, // Production frontend URL
   'https://reviewpage.co.kr', // Production domain
   'https://www.reviewpage.co.kr', // Production domain with www
+  'https://frontend-production-a55d.up.railway.app', // Railway production frontend
   // Allow any localhost origin during development/testing
   /^http:\/\/localhost:\d+$/,
-  /^http:\/\/127\.0\.0\.1:\d+$/
+  /^http:\/\/127\.0\.0\.1:\d+$/,
+  // Allow any Railway app domain for flexibility
+  /^https:\/\/.*\.up\.railway\.app$/
 ].filter(Boolean);
 
 app.use(cors({
