@@ -170,6 +170,7 @@ const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 External health check: http://0.0.0.0:${PORT}/health`);
   console.log(`✅ Server ready to accept connections`);
+  console.log(`🆕 Enhanced error messages deployed`);
   
   // Auto-create test users in production (Railway)
   if (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) {
