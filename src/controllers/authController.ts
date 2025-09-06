@@ -16,8 +16,8 @@ export const registerValidation = [
 ];
 
 export const loginValidation = [
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').notEmpty().withMessage('Password is required')
+  body('email').isEmail().withMessage('올바른 이메일 형식을 입력해주세요.'),
+  body('password').notEmpty().withMessage('비밀번호를 입력해주세요.')
 ];
 
 export const register = async (req: Request, res: Response) => {
@@ -122,7 +122,12 @@ export const login = async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       console.log('❌ Validation errors:', errors.array());
-      return res.status(400).json({ errors: errors.array() });
+      const firstError = errors.array()[0];
+      return res.status(400).json({ 
+        error: firstError.msg,
+        code: 'VALIDATION_ERROR',
+        field: firstError.path
+      });
     }
 
     const { email, password } = req.body;
@@ -136,7 +141,10 @@ export const login = async (req: Request, res: Response) => {
 
     if (!user) {
       console.log('❌ User not found in database');
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ 
+        error: '등록되지 않은 이메일입니다. 이메일을 확인해주세요.',
+        code: 'USER_NOT_FOUND'
+      });
     }
     
     console.log('✅ User found in database');
@@ -151,7 +159,10 @@ export const login = async (req: Request, res: Response) => {
       console.log('❌ Password verification failed');
       console.log(`   Expected password length: ${password.length}`);
       console.log(`   Hash: ${user.password.substring(0, 20)}...`);
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ 
+        error: '비밀번호가 일치하지 않습니다. 다시 확인해주세요.',
+        code: 'INVALID_PASSWORD'
+      });
     }
     
     console.log('✅ Password verification successful');
@@ -191,6 +202,9 @@ export const login = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('❌ Login error:', error);
     console.error('🔍 Error stack:', error.stack);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ 
+      error: '로그인 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+      code: 'SERVER_ERROR'
+    });
   }
 };
